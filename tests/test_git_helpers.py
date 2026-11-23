@@ -30,6 +30,19 @@ def test_git_env_does_not_mutate_base_env():
     assert base == {"A": "1"}
 
 
+def test_git_env_empty_base_env_is_used_as_is_not_replaced_by_os_environ(monkeypatch):
+    # An empty mapping is a valid base environment. It must not fall back to os.environ
+    # just because it is "falsy": only base_env=None means "use os.environ".
+    monkeypatch.setenv("EI_MARKER", "should-not-leak")
+    assert git_env(None, base_env={}) == {"GIT_TERMINAL_PROMPT": "0"}
+    assert set(git_env("tok", base_env={})) == {
+        "GIT_TERMINAL_PROMPT",
+        "GIT_CONFIG_COUNT",
+        "GIT_CONFIG_KEY_0",
+        "GIT_CONFIG_VALUE_0",
+    }
+
+
 def test_git_env_defaults_to_os_environ(monkeypatch):
     monkeypatch.setenv("EI_MARKER", "yes")
     assert git_env(None)["EI_MARKER"] == "yes"
