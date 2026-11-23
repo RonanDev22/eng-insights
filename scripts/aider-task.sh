@@ -18,6 +18,7 @@ fi
 exec aider \
   --model "${AIDER_MODEL:-ollama_chat/qwen2.5-coder:14b}" \
   --edit-format whole \
+  --map-tokens 0 \
   --read CONVENTIONS.md \
   --read openspec/changes/add-repo-ingestion/design.md \
   --read "$TEST" \
