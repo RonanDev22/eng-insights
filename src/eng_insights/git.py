@@ -30,7 +30,13 @@ def redact(text: str, token: str | None) -> str:
     The base64 form is base64(f"x-access-token:{token}") as produced in `git_env`.
     If `token` is None or empty, return `text` unchanged.
     """
-    raise NotImplementedError
+    if not token:
+        return text
+
+    b64_token = base64.b64encode(f"x-access-token:{token}".encode()).decode()
+    text = text.replace(token, "***")
+    text = text.replace(b64_token, "***")
+    return text
 
 
 def git_env(token: str | None, base_env: Mapping[str, str] | None = None) -> dict[str, str]:
@@ -46,7 +52,16 @@ def git_env(token: str | None, base_env: Mapping[str, str] | None = None) -> dic
       (base64 of the UTF-8 bytes, decoded to str).
     - If `token` is falsy, do not add any GIT_CONFIG_* keys.
     """
-    raise NotImplementedError
+    env = dict(base_env or os.environ)
+    env["GIT_TERMINAL_PROMPT"] = "0"
+
+    if token:
+        b64_token = base64.b64encode(f"x-access-token:{token}".encode()).decode()
+        env["GIT_CONFIG_COUNT"] = "1"
+        env["GIT_CONFIG_KEY_0"] = "http.extraHeader"
+        env["GIT_CONFIG_VALUE_0"] = f"Authorization: Basic {b64_token}"
+
+    return env
 
 
 def run_git(args: Sequence[str], cwd: Path | None = None, token: str | None = None) -> str:
@@ -59,4 +74,27 @@ def run_git(args: Sequence[str], cwd: Path | None = None, token: str | None = No
       redact(f"git {' '.join(args)} failed ({returncode}): {stderr.strip()}", token)
       and whose returncode is the process return code.
     """
-    raise NotImplementedError
+    env = git_env(token)
+    command = ["git", *args]
+    log.debug(redact(f"Running command: {' '.join(command)}", token))
+
+    result = subprocess.run(
+        command,
+        cwd=cwd,
+        env=env,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+    if result.returncode != 0:
+        raise GitError(
+            redact(
+                f"git {' '.join(args)} failed ({result.returncode}): {result.stderr.strip()}",
+                token,
+            ),
+            result.returncode,
+        )
+
+    return result.stdout
