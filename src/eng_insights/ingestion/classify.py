@@ -36,4 +36,20 @@ def is_generated_path(path: str) -> bool:
     5. Otherwise False. A file that is itself named `build` or `dist` is NOT generated,
        and a directory like `src/distribution` is NOT generated.
     """
-    raise NotImplementedError
+    # Replace backslashes with forward slashes and split the path
+    segments = path.replace("\\", "/").split("/")
+    
+    # Check if the last segment is in LOCKFILE_NAMES
+    if segments[-1].lower() in LOCKFILE_NAMES:
+        return True
+    
+    # Check if the last segment ends with any of GENERATED_SUFFIXES
+    if any(segments[-1].lower().endswith(suffix) for suffix in GENERATED_SUFFIXES):
+        return True
+    
+    # Check if any segment except the last is in GENERATED_DIRS
+    if any(segment in GENERATED_DIRS for segment in segments[:-1]):
+        return True
+    
+    # Otherwise, return False
+    return False
