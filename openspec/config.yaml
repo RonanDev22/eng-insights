@@ -1,14 +1,25 @@
 schema: spec-driven
 
-
 context: |
-  Tool: engineering-insights, an internal analytics app for a head of engineering.
+  Tool: eng-insights, an internal analytics app for a head of engineering.
   Purpose: surface git/GitHub activity per engineer and team as conversation
   starters, NOT a ranking or leaderboard.
-  Stack: Python 3.12, FastAPI, SQLModel, SQLite, Jinja2 + HTMX, pytest, ruff.
-  Conventions: small modules (<300 lines), type hints everywhere, no ORM
-  logic in route handlers, every function in services/ has a unit test.
-  Parsing: tree-sitter for complexity analysis. Git data via `git log --numstat`
-  and subprocess, never via the GitHub API for commit data.
+  Stack: Python 3.11+, stdlib sqlite3 (no ORM) and argparse for the ingestion
+  layer; FastAPI + Jinja2 + HTMX for the web UI in later changes; pytest; ruff.
+  Layout: src/eng_insights/ (package), tests/ (pytest). Tests run without
+  installing the package (pytest config sets pythonpath=src).
+  Conventions: small modules (<300 lines), type hints everywhere, no SQL inside
+  route handlers, every public function has a unit test, timestamps are stored
+  as UTC ISO-8601 strings.
+  Git data comes from `git log --numstat` against a local bare clone, never from
+  the GitHub API. Credentials are passed to git through environment variables
+  and never appear in URLs, logs, error messages or .git/config.
   Guardrails: no composite "score per engineer" without showing its components;
-  all metrics show median and p90, not just averages.
+  metrics show median and p90, not just averages.
+
+rules:
+  specs:
+    - Every requirement uses SHALL/MUST and has at least one scenario.
+    - Scenarios must be testable with a throwaway local git repository.
+  tasks:
+    - Each task names exactly one source file and the pytest command that proves it done.

@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+*.egg-info/
+eng_insights.db
+.cache/
+.aider*
+!.aider.model.settings.yml
+.DS_Store
