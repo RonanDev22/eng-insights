@@ -1,0 +1,14 @@
+schema: spec-driven
+
+
+context: |
+  Tool: engineering-insights, an internal analytics app for a head of engineering.
+  Purpose: surface git/GitHub activity per engineer and team as conversation
+  starters, NOT a ranking or leaderboard.
+  Stack: Python 3.12, FastAPI, SQLModel, SQLite, Jinja2 + HTMX, pytest, ruff.
+  Conventions: small modules (<300 lines), type hints everywhere, no ORM
+  logic in route handlers, every function in services/ has a unit test.
+  Parsing: tree-sitter for complexity analysis. Git data via `git log --numstat`
+  and subprocess, never via the GitHub API for commit data.
+  Guardrails: no composite "score per engineer" without showing its components;
+  all metrics show median and p90, not just averages.
