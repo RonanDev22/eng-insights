@@ -52,7 +52,7 @@ def git_env(token: str | None, base_env: Mapping[str, str] | None = None) -> dic
       (base64 of the UTF-8 bytes, decoded to str).
     - If `token` is falsy, do not add any GIT_CONFIG_* keys.
     """
-    env = dict(base_env) if base_env else os.environ.copy()
+    env = dict(os.environ if base_env is None else base_env)
     env["GIT_TERMINAL_PROMPT"] = "0"
 
     if token:
