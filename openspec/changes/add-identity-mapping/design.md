@@ -43,6 +43,16 @@ Commit-to-engineer join: `JOIN engineer_emails ee ON ee.email = lower(c.author_e
    differ, `UPDATE engineer_emails SET engineer_id = keep`, then delete the removed
    engineer. The survivor's name and bot flag win.
 
+8. **Name-based merging (added after a real run on pallets/click).** In 3,416 commits, ten
+   of the top authors each used two emails, e.g. a personal address plus a GitHub noreply
+   address whose username differs from the email (`kevin@deldycke.com` and
+   `kdeldycke@users.noreply.github.com`). Only the author name links them, so discovery
+   joins unmapped emails that share a normalised, multi-word author name. Single-word names
+   are excluded because they are usually usernames and collide. Wrong merges are recoverable
+   with `unmerge_email`, and discovery reports how many name-merges it performed so they are
+   never silent. Author names come from `commits.author_name` (all names seen per email).
+   Known risk: two different people with the same full name merge; the unmerge command is the fix.
+
 ## Interface (what the next change relies on)
 
 `src/eng_insights/identity.py`:
@@ -50,8 +60,10 @@ Commit-to-engineer join: `JOIN engineer_emails ee ON ee.email = lower(c.author_e
 - `normalise_email(email: str) -> str`: lowercase, stripped.
 - `noreply_username(email: str) -> str | None`
 - `looks_like_bot(name: str, email: str) -> bool`
-- `discover_engineers(conn) -> int`: returns the number of engineers created.
+- `discover_engineers(conn) -> DiscoveryResult`: `created` (engineers created) and `name_merged`
+  (emails joined to another engineer by author name).
 - `merge_engineers(conn, keep_id: int, remove_id: int) -> None`
+- `unmerge_email(conn, email: str) -> int`: returns the new engineer id.
 - `rename_engineer(conn, engineer_id: int, name: str) -> None`
 - `set_bot(conn, engineer_id: int, is_bot: bool) -> None`
 - `list_engineers(conn) -> list[sqlite3.Row]`: id, display_name, is_bot, emails (comma-joined), commit_count.

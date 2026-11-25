@@ -8,8 +8,9 @@
 
 ## 3. Discovery and management
 
-- [ ] 3.1 `discover_engineers` with tests: new email, case-insensitive, idempotent, noreply merging, bots, manual overrides survive.
-- [ ] 3.2 `merge_engineers`, `rename_engineer`, `set_bot`, `list_engineers` with tests: merge moves emails, invalid merges raise and change nothing, rename persists.
+- [ ] 3.1 `discover_engineers` with tests: new email, case-insensitive, idempotent, noreply merging, name-based merging (including single-word exclusion and joining an existing engineer), bots, manual overrides survive.
+- [ ] 3.2 `merge_engineers`, `unmerge_email`, `rename_engineer`, `set_bot`, `list_engineers` with tests: merge moves emails, invalid merges raise and change nothing, rename persists, unmerge splits an email off.
+- [ ] 3.3 Regression test using real data: seed the exact pallets/click emails and names from the design notes (`kevin@deldycke.com` + `kdeldycke@users.noreply.github.com` as "Kevin Deldycke", and the four bot accounts) and assert one Kevin engineer and four bot engineers.
 
 ## 4. CLI
 
